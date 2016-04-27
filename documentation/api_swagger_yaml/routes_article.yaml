@@ -1,0 +1,150 @@
+# Роуты для статей
+  /test/articles:
+    post:
+      tags:
+        - статьи
+      summary: Добавление статьи
+      parameters:
+        - in: body
+          name: data
+          description: Данные для добавлении статьи
+          required: true
+          schema:
+            $ref: '#/definitions/Article'
+      responses:
+        201:
+          description: Успешно создана
+          schema:
+            $ref: '#/definitions/Article'
+        422:
+          description: Ошибки валидации
+          schema:
+            $ref: '#/definitions/ErrorValidationArray'
+        500:
+          description: Ошибка обработки запроса
+          schema:
+            $ref: '#/definitions/ErrorStatus'
+    get:
+      tags:
+        - статьи
+      summary: Получение списка статей
+      parameters:
+        - in: query
+          name: filter[alias]
+          description: Идентификатор места размещения
+          required: false
+          type: integer
+          format: int64
+        - in: query
+          name: filter[title]
+          description: Название
+          required: false
+          type: string
+        - in: query
+          name: offset
+          description: Смещение
+          required: false
+          type: integer
+          format: int64
+        - in: query
+          name: limit
+          description: Количество элементов
+          required: false
+          type: integer
+          format: int64
+      responses:
+        200:
+          description: Список статей
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Article'
+        404:
+          description: Список статей не найден
+          schema:
+            $ref: '#/definitions/ErrorStatus'
+        500:
+          description: Ошибка обработки запроса
+          schema:
+            $ref: '#/definitions/ErrorStatus'
+
+  /test/articles/{id}:
+    get:
+      tags:
+        - статьи
+      summary: Получение статьи
+      parameters:
+        - in: query
+          name: access-token
+          description: Ключ доступа приложения
+          required: true
+          type: string
+        - in: path
+          name: id
+          description: Идентификатор
+          required: true
+          type: integer
+          format: int64
+      responses:
+        200:
+          description: Данные статьи
+          schema:
+            $ref: '#/definitions/Article'
+        404:
+          description: Статья не найдена
+          schema:
+            $ref: '#/definitions/ErrorStatus'
+        500:
+          description: Ошибка обработки запроса
+          schema:
+            $ref: '#/definitions/ErrorStatus'
+    put:
+      tags:
+        - статьи
+      summary: Обновление статьи
+      parameters:
+        - in: path
+          name: id
+          description: Идентификатор
+          required: true
+          type: integer
+          format: int64
+        - in: body
+          name: data
+          description: Данные для обновления
+          required: true
+          schema:
+            $ref: '#/definitions/Article'
+      responses:
+        200:
+          description: Данные обновленной статьи
+          schema:
+            $ref: '#/definitions/Article'
+        422:
+          description: Ошибки валидации
+          schema:
+            $ref: '#/definitions/ErrorValidationArray'
+        500:
+          description: Ошибка обработки запроса
+          schema:
+            $ref: '#/definitions/ErrorStatus'
+    delete:
+      tags:
+        - статьи
+      summary: Удаление статьи
+      parameters:
+        - in: path
+          name: id
+          description: Идентификатор
+          required: true
+          type: integer
+          format: int64
+      responses:
+        404:
+          description: Статья не найдена
+          schema:
+            $ref: '#/definitions/ErrorStatus'
+        500:
+          description: Ошибка обработки запроса
+          schema:
+            $ref: '#/definitions/ErrorStatus'

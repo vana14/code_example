@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="RestApi" default="help" basedir=".">
+    <property name="WEB_DOC_DIR" value="${application.startdir}/web/doc" />
+    <property name="DOC_DIR" value="${application.startdir}/documentation" />
+    <property name="DOC_YAML_DIR" value="${DOC_DIR}/api_swagger_yaml" />
+    <property name="TMP_WORK_DIR" value="${application.startdir}/tmp" />
+    <property name="SWAGGER_UI_DIR" value="${DOC_DIR}/swagger_ui" />
+    <property name="RESULT_API_JSON" value="${SWAGGER_UI_DIR}/api.json" />
+
+    <target name="prepare-tmp">
+        <echo msg="Making directory ${TMP_WORK_DIR}" />
+        <mkdir dir="${TMP_WORK_DIR}" />
+    </target>
+
+    <target name="remove-tmp">
+        <echo msg="Remove directory ${TMP_WORK_DIR}" />
+        <delete dir="${TMP_WORK_DIR}" />
+    </target>
+
+    <target name="make-doc" depends="prepare-tmp">
+        <echo msg="Copying YAML files to build directory..." />
+        <copy todir="${TMP_WORK_DIR}" includeemptydirs="true" verbose="false">
+            <fileset dir="${DOC_YAML_DIR}">
+                <include name="**" />
+            </fileset>
+        </copy>
+
+        <echo msg="Concatenate All YAML files into one" />
+        <delete file="${TMP_WORK_DIR}/api.yaml" />
+        <append destFile="${TMP_WORK_DIR}/api.yaml">
+            <fileset dir="${TMP_WORK_DIR}">
+                <include name="main.yaml"/>
+            </fileset>
+            <fileset dir="${TMP_WORK_DIR}">
+                <include name="routes*.yaml"/>
+                <exclude name="main.yaml"/>
+            </fileset>
+            <fileset dir="${TMP_WORK_DIR}">
+                <include name="*.yaml"/>
+                <exclude name="routes*.yaml"/>
+                <exclude name="main.yaml"/>
+            </fileset>
+        </append>
+
+        <echo msg="Convert YAML to JSON" />
+        <delete file="${RESULT_API_JSON}" />
+        <exec command="ruby ${DOC_DIR}/swagger_yaml_to_json.rb ${TMP_WORK_DIR}/api.yaml ${RESULT_API_JSON}" outputProperty="result" />
+
+        <phingcall target="remove-tmp" />
+
+        <echo msg="Make doc symlink" />
+        <delete file="${WEB_DOC_DIR}" />
+        <symlink target="${SWAGGER_UI_DIR}" link="${WEB_DOC_DIR}" />
+    </target>
+
+    <!-- ============================================  -->
+    <!-- (DEFAULT)  Target: help                       -->
+    <!-- ============================================  -->
+    <target name="help" description="Доступные команды">
+        <echo msg="Сборка REST АПИ. Доступные команды:" />
+        <echo msg="    make-doc - создание документации" />
+    </target>
+</project>

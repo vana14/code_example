@@ -1,0 +1,51 @@
+# Модели
+definitions:
+  ErrorStatus:
+    description: Сообщение об ошибке
+    required:
+      - code
+      - message
+    properties:
+      code:
+        type: number
+      message:
+        type: string
+
+  ErrorValidation:
+    description: Ошибки валидации модели
+    required:
+      - field
+      - message
+    properties:
+      field:
+        type: string
+      message:
+        type: string
+
+  ErrorValidationArray:
+    type: array
+    items:
+      $ref: '#/definitions/ErrorValidation'
+
+  Article:
+    description: Статья
+    required:
+      - title
+      - description
+    properties:
+      id:
+        description: Идентификатор
+        type: integer
+        format: int64
+      title:
+        description: Название
+        type: string
+      alias:
+        description: Псевдоним
+        type: string
+      annotation:
+        description: Аннотация
+        type: string
+      description:
+        description: Описание
+        type: string
