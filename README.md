@@ -1,102 +1,90 @@
-Yii 2 Basic Project Template
+Пример реализаци API для статей на Yii2
 ============================
 
-Yii 2 Basic Project Template is a skeleton [Yii 2](http://www.yiiframework.com/) application best for
-rapidly creating small projects.
+ЗАВИСИМОСТИ
+-----------
 
-The template contains the basic features including user login/logout and a contact page.
-It includes all commonly used configurations that would allow you to focus on adding new
-features to your application.
-
-[![Latest Stable Version](https://poser.pugx.org/yiisoft/yii2-app-basic/v/stable.png)](https://packagist.org/packages/yiisoft/yii2-app-basic)
-[![Total Downloads](https://poser.pugx.org/yiisoft/yii2-app-basic/downloads.png)](https://packagist.org/packages/yiisoft/yii2-app-basic)
-[![Build Status](https://travis-ci.org/yiisoft/yii2-app-basic.svg?branch=master)](https://travis-ci.org/yiisoft/yii2-app-basic)
-
-DIRECTORY STRUCTURE
--------------------
-
-      assets/             contains assets definition
-      commands/           contains console commands (controllers)
-      config/             contains application configurations
-      controllers/        contains Web controller classes
-      mail/               contains view files for e-mails
-      models/             contains model classes
-      runtime/            contains files generated during runtime
-      tests/              contains various tests for the basic application
-      vendor/             contains dependent 3rd-party packages
-      views/              contains view files for the Web application
-      web/                contains the entry script and Web resources
+* PHP >= 5.4.0
+* Composer
+* Phing
+* Ruby
+* PostgreSQL >= 9.3
 
 
+УСТАНОВКА
+---------
 
-REQUIREMENTS
-------------
+1. Клонируем репозиторий
+2. composer install
+3. Меняем содержимое файла .env с настройками для подключения к БД
+4. phing make-doc (генерация документации на swagger)
 
-The minimum requirement by this project template that your Web server supports PHP 5.4.0.
+ВЕБ СЕРВЕР
+---------
 
+Для Apache
 
-INSTALLATION
-------------
+# Set document root to be "basic/web"
+DocumentRoot "path/to/basic/web"
 
-### Install from an Archive File
+<Directory "path/to/basic/web">
+    # use mod_rewrite for pretty URL support
+    RewriteEngine on
+    # If a directory or a file exists, use the request directly
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    # Otherwise forward the request to index.php
+    RewriteRule . index.php
 
-Extract the archive file downloaded from [yiiframework.com](http://www.yiiframework.com/download/) to
-a directory named `basic` that is directly under the Web root.
+    # ...other settings...
+</Directory>
 
-Set cookie validation key in `config/web.php` file to some random secret string:
+Для Nginx:
 
-```php
-'request' => [
-    // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
-    'cookieValidationKey' => '<secret random string goes here>',
-],
-```
+server {
+    charset utf-8;
+    client_max_body_size 128M;
 
-You can then access the application through the following URL:
+    listen 80; ## listen for ipv4
+    #listen [::]:80 default_server ipv6only=on; ## listen for ipv6
 
-~~~
-http://localhost/basic/web/
-~~~
+    server_name mysite.local;
+    root        /path/to/basic/web;
+    index       index.php;
 
+    access_log  /path/to/basic/log/access.log;
+    error_log   /path/to/basic/log/error.log;
 
-### Install via Composer
+    location / {
+        # Redirect everything that isn't a real file to index.php
+        try_files $uri $uri/ /index.php?$args;
+    }
 
-If you do not have [Composer](http://getcomposer.org/), you may install it by following the instructions
-at [getcomposer.org](http://getcomposer.org/doc/00-intro.md#installation-nix).
+    # uncomment to avoid processing of calls to non-existing static files by Yii
+    #location ~ \.(js|css|png|jpg|gif|swf|ico|pdf|mov|fla|zip|rar)$ {
+    #    try_files $uri =404;
+    #}
+    #error_page 404 /404.html;
 
-You can then install this project template using the following command:
+    location ~ \.php$ {
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $document_root/$fastcgi_script_name;
+        fastcgi_pass   127.0.0.1:9000;
+        #fastcgi_pass unix:/var/run/php5-fpm.sock;
+        try_files $uri =404;
+    }
 
-~~~
-php composer.phar global require "fxp/composer-asset-plugin:~1.1.1"
-php composer.phar create-project --prefer-dist --stability=dev yiisoft/yii2-app-basic basic
-~~~
+    location ~ /\.(ht|svn|git) {
+        deny all;
+    }
+}
 
-Now you should be able to access the application through the following URL, assuming `basic` is the directory
-directly under the Web root.
-
-~~~
-http://localhost/basic/web/
-~~~
-
-
-CONFIGURATION
+ЗАПУСК ТЕСТОВ
 -------------
 
-### Database
+Для запуска тестов перейдите в папку `tests` и выполните команду `./run-tests`
 
-Edit the file `config/db.php` with real data, for example:
+ПРОСМОТР ДОКУМЕНТАЦИИ
+-------------
 
-```php
-return [
-    'class' => 'yii\db\Connection',
-    'dsn' => 'mysql:host=localhost;dbname=yii2basic',
-    'username' => 'root',
-    'password' => '1234',
-    'charset' => 'utf8',
-];
-```
-
-**NOTES:**
-- Yii won't create the database for you, this has to be done manually before you can access it.
-- Check and edit the other files in the `config/` directory to customize your application as required.
-- Refer to the README in the `tests` directory for information specific to basic application tests.
+перейдите по url - /doc/index.html
